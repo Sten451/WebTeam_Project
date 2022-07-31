@@ -14,8 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
+from ProductPlatform.script.change_order_status import start_thread_check_order_status
+from orders.views import MainView
+
+start_thread_check_order_status()  # запуск скрипта проверки заказов на актуальность по дате
 
 urlpatterns = [
+    path('', MainView.as_view(), name='main'),
     path('admin/', admin.site.urls),
+    path('orders/', include('orders.urls', namespace='orders')),
+    path('users/', include('users.urls', namespace='users')),
+    path('users/', include('django.contrib.auth.urls'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
